@@ -1,0 +1,31 @@
+# Claude Code assistant folder
+.claude/
+
+# Common temporary files
+*.tmp
+*.temp
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Log files
+*.log
+
+# Temporary text files from PDF conversion
+*_content.txt
+paper_content.txt
+keynote_content.txt
+auditllm_content.txt

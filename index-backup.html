@@ -15,7 +15,7 @@
         }
         
         body {
-            font-family: 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
@@ -42,36 +42,6 @@
         .subtitle {
             font-size: 1.2rem;
             opacity: 0.95;
-        }
-        
-        .search-box {
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .search-input {
-            width: 100%;
-            max-width: 600px;
-            padding: 15px 20px;
-            font-size: 1rem;
-            font-family: 'Atkinson Hyperlegible', sans-serif;
-            border: 2px solid white;
-            border-radius: 30px;
-            background: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: box-shadow 0.3s;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .stats {
-            text-align: center;
-            color: white;
-            margin-bottom: 20px;
-            font-size: 1.1rem;
         }
         
         .papers-grid {
@@ -104,7 +74,7 @@
         
         .paper-title {
             font-size: 1.1rem;
-            font-weight: 700;
+            font-weight: 600;
             color: #333;
             margin-bottom: 10px;
             line-height: 1.4;
@@ -140,139 +110,127 @@
             background: linear-gradient(transparent, white);
         }
         
-        /* Modal Styles */
-        .modal-backdrop {
-            display: none;
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            animation: fadeIn 0.3s;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
         }
         
-        .modal-backdrop.show {
-            display: block;
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
         }
         
-        .modal-content {
-            display: none;
+        .readme-viewer {
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%) scale(0.9);
             width: 90%;
             max-width: 1200px;
             height: 90vh;
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 25px 70px rgba(0,0,0,0.4);
-            z-index: 1001;
-            overflow: hidden;
-            animation: slideIn 0.3s;
-        }
-        
-        .modal-content.show {
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 1000;
             display: flex;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            overflow: hidden;
             flex-direction: column;
         }
         
-        .modal-header {
+        .readme-viewer.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .readme-header {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 25px 30px;
-            border-bottom: 2px solid #eee;
-            background: #fafafa;
         }
         
-        .modal-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #2d3748;
-            margin: 0;
-            max-width: 80%;
-        }
-        
-        .modal-close {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-family: 'Atkinson Hyperlegible', sans-serif;
-            font-weight: 700;
-            transition: background 0.3s;
-        }
-        
-        .modal-close:hover {
-            background: #5a67d8;
-        }
-        
-        .modal-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 30px;
-            font-size: 1.05rem;
-            line-height: 1.8;
-        }
-        
-        .modal-body h1 { 
-            font-size: 2rem; 
-            margin: 30px 0 20px 0;
-            color: #2d3748;
-            font-weight: 700;
-        }
-        
-        .modal-body h2 { 
-            font-size: 1.6rem; 
-            margin: 25px 0 15px 0;
-            color: #2d3748;
-            font-weight: 700;
-        }
-        
-        .modal-body h3 { 
-            font-size: 1.3rem; 
-            margin: 20px 0 10px 0;
-            color: #2d3748;
-            font-weight: 700;
-        }
-        
-        .modal-body p {
-            margin-bottom: 15px;
+        .readme-title {
+            font-size: 1.5rem;
             color: #333;
         }
         
-        .modal-body ul, .modal-body ol {
-            margin: 15px 0 15px 30px;
+        .close-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
         }
         
-        .modal-body li {
+        .close-btn:hover {
+            background: #5a67d8;
+        }
+        
+        .readme-content {
+            line-height: 1.8;
+            color: #333;
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 15px;
+        }
+        
+        .readme-content h1, .readme-content h2, .readme-content h3 {
+            margin-top: 20px;
             margin-bottom: 10px;
+            color: #2d3748;
         }
         
-        .modal-body code {
+        .readme-content h1 { font-size: 1.8rem; }
+        .readme-content h2 { font-size: 1.5rem; }
+        .readme-content h3 { font-size: 1.3rem; }
+        
+        .readme-content p {
+            margin-bottom: 15px;
+        }
+        
+        .readme-content ul, .readme-content ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .readme-content li {
+            margin-bottom: 8px;
+        }
+        
+        .readme-content code {
             background: #f5f5f5;
-            padding: 3px 8px;
-            border-radius: 4px;
+            padding: 2px 6px;
+            border-radius: 3px;
             font-family: 'Courier New', monospace;
-            font-size: 0.95em;
         }
         
-        .modal-body pre {
-            background: #f8f8f8;
-            padding: 20px;
-            border-radius: 8px;
+        .readme-content pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 6px;
             overflow-x: auto;
-            margin: 20px 0;
-            border-left: 4px solid #667eea;
+            margin-bottom: 15px;
         }
         
-        .modal-body blockquote {
+        .readme-content blockquote {
             border-left: 4px solid #667eea;
             padding-left: 20px;
             margin: 20px 0;
@@ -280,30 +238,57 @@
             font-style: italic;
         }
         
-        .modal-body a {
+        .readme-content a {
             color: #667eea;
             text-decoration: none;
-            font-weight: 500;
         }
         
-        .modal-body a:hover {
+        .readme-content a:hover {
             text-decoration: underline;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .search-box {
+            margin-bottom: 30px;
+            text-align: center;
         }
         
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -45%);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%);
-            }
+        .search-input {
+            width: 100%;
+            max-width: 600px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            border: 2px solid white;
+            border-radius: 30px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .stats {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c00;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
         }
         
         @media (max-width: 768px) {
@@ -315,21 +300,11 @@
                 font-size: 2rem;
             }
             
-            .modal-content {
+            .readme-viewer {
+                padding: 20px;
                 width: 95%;
                 height: 95vh;
             }
-            
-            .modal-body {
-                padding: 20px;
-            }
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: white;
-            font-size: 1.2rem;
         }
     </style>
 </head>
@@ -351,21 +326,19 @@
         </div>
     </div>
     
-    <!-- Modal -->
-    <div class="modal-backdrop" id="modalBackdrop"></div>
-    <div class="modal-content" id="modalContent">
-        <div class="modal-header">
-            <h2 class="modal-title" id="modalTitle">Paper Title</h2>
-            <button class="modal-close" id="modalClose">Close (ESC)</button>
+    <div class="modal-overlay" id="modalOverlay" onclick="closeReadme()"></div>
+    
+    <div class="readme-viewer" id="readmeViewer">
+        <div class="readme-header">
+            <h2 class="readme-title" id="readmeTitle"></h2>
+            <button class="close-btn" onclick="closeReadme()">Close (ESC)</button>
         </div>
-        <div class="modal-body" id="modalBody">
-            <!-- README content will be inserted here -->
-        </div>
+        <div class="readme-content" id="readmeContent"></div>
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        // Paper data
+        // Paper data with README paths
         const papers = [
             { title: "Large Scale Deployment of BERT Based Cross Encoder Model for Re-Ranking in Walmart Search Engine", path: "Large Scale Deployment of BERT Based Cross Encoder Model for Re-Ranking in Walmart Search Engine" },
             { title: "Structure-Aware Conversational Legal Case Retrieval", path: "Structure-Aware Conversational Legal Case Retrieval" },
@@ -419,16 +392,7 @@
         
         let readmeCache = {};
         let currentPaper = null;
-        let allCards = [];
         
-        // Modal elements
-        const modalBackdrop = document.getElementById('modalBackdrop');
-        const modalContent = document.getElementById('modalContent');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalBody = document.getElementById('modalBody');
-        const modalClose = document.getElementById('modalClose');
-        
-        // Load README content
         async function loadReadme(paper) {
             if (readmeCache[paper.path]) {
                 return readmeCache[paper.path];
@@ -447,55 +411,21 @@
             }
         }
         
-        // Extract preview text
         function extractPreview(markdown) {
             const lines = markdown.split('\n');
+            let preview = '';
             for (let line of lines) {
                 if (line.trim() && !line.startsWith('#')) {
-                    const preview = line.trim();
-                    return preview.length > 150 ? preview.substring(0, 150) + '...' : preview;
+                    preview = line.trim();
+                    break;
                 }
             }
-            return '';
+            return preview.length > 150 ? preview.substring(0, 150) + '...' : preview;
         }
         
-        // Open modal
-        function openModal(paper) {
-            currentPaper = paper;
-            
-            // Load and display content
-            loadReadme(paper).then(content => {
-                modalTitle.textContent = paper.title;
-                modalBody.innerHTML = marked.parse(content);
-                
-                // Show modal
-                modalBackdrop.classList.add('show');
-                modalContent.classList.add('show');
-                document.body.style.overflow = 'hidden';
-                
-                // Update active card
-                allCards.forEach((card, index) => {
-                    card.classList.toggle('active', papers[index] === paper);
-                });
-            });
-        }
-        
-        // Close modal
-        function closeModal() {
-            modalBackdrop.classList.remove('show');
-            modalContent.classList.remove('show');
-            document.body.style.overflow = '';
-            
-            // Remove active state from cards
-            allCards.forEach(card => card.classList.remove('active'));
-            currentPaper = null;
-        }
-        
-        // Display all papers
         async function displayPapers() {
             const grid = document.getElementById('papersGrid');
             grid.innerHTML = '';
-            allCards = [];
             
             for (const paper of papers) {
                 const card = document.createElement('div');
@@ -510,51 +440,88 @@
                     <div class="paper-preview">${preview || 'Click to view README content...'}</div>
                 `;
                 
-                // Add click handler
-                card.addEventListener('click', () => openModal(paper));
-                
+                card.onclick = () => openReadme(paper);
                 grid.appendChild(card);
-                allCards.push(card);
             }
             
             document.getElementById('stats').textContent = `${papers.length} papers available`;
         }
         
+        async function openReadme(paper) {
+            currentPaper = paper;
+            const viewer = document.getElementById('readmeViewer');
+            const overlay = document.getElementById('modalOverlay');
+            const content = await loadReadme(paper);
+            
+            document.getElementById('readmeTitle').textContent = paper.title;
+            document.getElementById('readmeContent').innerHTML = marked.parse(content);
+            
+            // Prevent body scroll when modal is open
+            document.body.style.overflow = 'hidden';
+            
+            // Show modal with animation
+            overlay.classList.add('active');
+            viewer.classList.add('active');
+            
+            // Update active card
+            document.querySelectorAll('.paper-card').forEach((card, index) => {
+                card.classList.toggle('active', papers[index] === paper);
+            });
+        }
+        
+        function closeReadme() {
+            const viewer = document.getElementById('readmeViewer');
+            const overlay = document.getElementById('modalOverlay');
+            
+            // Re-enable body scroll
+            document.body.style.overflow = '';
+            
+            // Hide modal with animation
+            viewer.classList.remove('active');
+            overlay.classList.remove('active');
+            
+            document.querySelectorAll('.paper-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            currentPaper = null;
+        }
+        
+        // Add ESC key listener to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && currentPaper) {
+                closeReadme();
+            }
+        });
+        
         // Search functionality
         document.getElementById('searchInput').addEventListener('input', async (e) => {
             const searchTerm = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.paper-card');
             let visibleCount = 0;
             
-            for (let i = 0; i < allCards.length; i++) {
+            for (let i = 0; i < cards.length; i++) {
                 const paper = papers[i];
                 const readme = await loadReadme(paper);
                 const matchesTitle = paper.title.toLowerCase().includes(searchTerm);
                 const matchesContent = readme.toLowerCase().includes(searchTerm);
                 
                 if (searchTerm === '' || matchesTitle || matchesContent) {
-                    allCards[i].style.display = 'block';
+                    cards[i].style.display = 'block';
                     visibleCount++;
                 } else {
-                    allCards[i].style.display = 'none';
+                    cards[i].style.display = 'none';
                 }
             }
             
             document.getElementById('stats').textContent = `Showing ${visibleCount} of ${papers.length} papers`;
         });
         
-        // Modal event listeners
-        modalClose.addEventListener('click', closeModal);
-        modalBackdrop.addEventListener('click', closeModal);
-        
-        // ESC key to close modal
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && currentPaper) {
-                closeModal();
-            }
-        });
-        
         // Initialize
         displayPapers();
+        
+        // Make functions globally available for testing
+        window.openReadme = openReadme;
+        window.closeReadme = closeReadme;
     </script>
 </body>
 </html>

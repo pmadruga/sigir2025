@@ -435,7 +435,9 @@
             }
             
             try {
-                const response = await fetch(`${paper.path}/README.md`);
+                // Properly encode the path for URL
+                const encodedPath = encodeURIComponent(paper.path).replace(/%2F/g, '/');
+                const response = await fetch(`${encodedPath}/README.md`);
                 if (!response.ok) {
                     throw new Error('README not found');
                 }

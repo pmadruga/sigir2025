@@ -118,14 +118,14 @@
             bottom: 0;
             background: rgba(0, 0, 0, 0.8);
             z-index: 999;
-            display: none;
             opacity: 0;
+            pointer-events: none;
             transition: opacity 0.3s ease;
         }
         
         .modal-overlay.active {
-            display: block;
             opacity: 1;
+            pointer-events: auto;
         }
         
         .readme-viewer {
@@ -141,16 +141,17 @@
             padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             z-index: 1000;
-            display: none;
+            display: flex;
             opacity: 0;
+            pointer-events: none;
             transition: all 0.3s ease;
             overflow: hidden;
             flex-direction: column;
         }
         
         .readme-viewer.active {
-            display: flex;
             opacity: 1;
+            pointer-events: auto;
             transform: translate(-50%, -50%) scale(1);
         }
         
@@ -517,6 +518,10 @@
         
         // Initialize
         displayPapers();
+        
+        // Make functions globally available for testing
+        window.openReadme = openReadme;
+        window.closeReadme = closeReadme;
     </script>
 </body>
 </html>

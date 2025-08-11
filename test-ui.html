@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Test - README Modal</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-results {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .test-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .pass {
+            background: #d4f5d4;
+            color: #0a5f0a;
+        }
+        .fail {
+            background: #ffd4d4;
+            color: #8b0000;
+        }
+        .info {
+            background: #d4e4ff;
+            color: #003d82;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background: #4CAF50;
+            color: white;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #333;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>UI Test Suite for README Modal</h1>
+    
+    <div class="test-results" id="testResults">
+        <h2>Test Results</h2>
+        <div id="results"></div>
+    </div>
+    
+    <div>
+        <button onclick="runTests()">Run All Tests</button>
+        <button onclick="testManually()">Open Test Page</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <h2>Live Page Preview</h2>
+    <iframe id="testFrame" src="index.html"></iframe>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-item ${type}`;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            results.appendChild(div);
+            console.log(message);
+        }
+        
+        function clearResults() {
+            results.innerHTML = '';
+            log('Results cleared', 'info');
+        }
+        
+        async function runTests() {
+            clearResults();
+            log('Starting UI tests...', 'info');
+            
+            const iframe = document.getElementById('testFrame');
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            const iframeWin = iframe.contentWindow;
+            
+            // Wait for iframe to load
+            await new Promise(resolve => {
+                if (iframeDoc.readyState === 'complete') {
+                    resolve();
+                } else {
+                    iframe.onload = resolve;
+                }
+            });
+            
+            log('Page loaded', 'pass');
+            
+            // Test 1: Check if required elements exist
+            try {
+                const modalOverlay = iframeDoc.getElementById('modalOverlay');
+                const readmeViewer = iframeDoc.getElementById('readmeViewer');
+                const papersGrid = iframeDoc.getElementById('papersGrid');
+                
+                if (modalOverlay) {
+                    log('✓ Modal overlay element found', 'pass');
+                } else {
+                    log('✗ Modal overlay element NOT found', 'fail');
+                }
+                
+                if (readmeViewer) {
+                    log('✓ README viewer element found', 'pass');
+                } else {
+                    log('✗ README viewer element NOT found', 'fail');
+                }
+                
+                if (papersGrid) {
+                    log('✓ Papers grid element found', 'pass');
+                } else {
+                    log('✗ Papers grid element NOT found', 'fail');
+                }
+                
+                // Test 2: Check if paper cards exist
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for papers to load
+                
+                const paperCards = iframeDoc.querySelectorAll('.paper-card');
+                if (paperCards.length > 0) {
+                    log(`✓ Found ${paperCards.length} paper cards`, 'pass');
+                    
+                    // Test 3: Check if click handlers are attached
+                    const firstCard = paperCards[0];
+                    const hasOnclick = firstCard.onclick !== null;
+                    
+                    if (hasOnclick) {
+                        log('✓ Click handler attached to paper cards', 'pass');
+                    } else {
+                        log('✗ No click handler found on paper cards', 'fail');
+                    }
+                    
+                    // Test 4: Try to open modal by clicking
+                    log('Attempting to click first paper card...', 'info');
+                    firstCard.click();
+                    
+                    // Wait for modal animation
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Check if modal is visible
+                    const modalVisible = readmeViewer.classList.contains('active');
+                    const overlayVisible = modalOverlay.classList.contains('active');
+                    
+                    if (modalVisible && overlayVisible) {
+                        log('✓ Modal opened successfully', 'pass');
+                        
+                        // Test 5: Check if content is loaded
+                        const readmeContent = iframeDoc.getElementById('readmeContent');
+                        if (readmeContent && readmeContent.innerHTML.length > 0) {
+                            log('✓ README content loaded', 'pass');
+                        } else {
+                            log('✗ README content not loaded', 'fail');
+                        }
+                        
+                        // Test 6: Test close functionality
+                        const closeBtn = iframeDoc.querySelector('.close-btn');
+                        if (closeBtn) {
+                            closeBtn.click();
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                            
+                            const modalClosed = !readmeViewer.classList.contains('active');
+                            if (modalClosed) {
+                                log('✓ Modal closed successfully', 'pass');
+                            } else {
+                                log('✗ Modal did not close', 'fail');
+                            }
+                        } else {
+                            log('✗ Close button not found', 'fail');
+                        }
+                    } else {
+                        log('✗ Modal did not open', 'fail');
+                        log(`Modal active: ${modalVisible}, Overlay active: ${overlayVisible}`, 'info');
+                    }
+                    
+                    // Test 7: Check for JavaScript errors
+                    if (iframeWin.marked) {
+                        log('✓ Marked.js library loaded', 'pass');
+                    } else {
+                        log('✗ Marked.js library not loaded', 'fail');
+                    }
+                    
+                    // Test 8: Check if papers array exists
+                    if (iframeWin.papers && Array.isArray(iframeWin.papers)) {
+                        log(`✓ Papers array found with ${iframeWin.papers.length} items`, 'pass');
+                    } else {
+                        log('✗ Papers array not found or not an array', 'fail');
+                    }
+                    
+                } else {
+                    log('✗ No paper cards found - papers may not have loaded', 'fail');
+                }
+                
+            } catch (error) {
+                log(`✗ Test error: ${error.message}`, 'fail');
+                console.error(error);
+            }
+            
+            log('Tests completed', 'info');
+        }
+        
+        function testManually() {
+            window.open('index.html', '_blank');
+        }
+        
+        // Run tests automatically after page load
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 1000);
+        });
+    </script>
+</body>
+</html>

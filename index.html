@@ -435,17 +435,23 @@
             }
             
             try {
-                // Properly encode the path for URL
-                const encodedPath = encodeURIComponent(paper.path).replace(/%2F/g, '/');
+                // Split path and encode each part separately to handle special characters
+                const pathParts = paper.path.split('/');
+                const encodedParts = pathParts.map(part => encodeURIComponent(part));
+                const encodedPath = encodedParts.join('/');
+                
+                console.log(`Fetching: ${encodedPath}/README.md`); // Debug log
                 const response = await fetch(`${encodedPath}/README.md`);
                 if (!response.ok) {
+                    console.log(`Failed to fetch ${encodedPath}/README.md - Status: ${response.status}`);
                     throw new Error('README not found');
                 }
                 const content = await response.text();
                 readmeCache[paper.path] = content;
                 return content;
             } catch (error) {
-                return `# ${paper.title}\n\nREADME file not found or could not be loaded.`;
+                console.error(`Error loading README for ${paper.path}:`, error);
+                return `# ${paper.title}\n\nREADME file not found or could not be loaded.\n\nError: ${error.message}`;
             }
         }
         

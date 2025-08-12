@@ -340,6 +340,7 @@
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
         }
         
         .login-form h3 {
@@ -487,6 +488,101 @@
             background: #e6f3ff;
             border-color: #667eea;
         }
+        
+        /* Loading Spinner */
+        .spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .spinner.show {
+            display: block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Feedback Messages */
+        .auth-feedback {
+            display: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .auth-feedback.show {
+            display: block;
+        }
+        
+        .auth-feedback.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .auth-feedback.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .auth-feedback.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            z-index: 10;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+        
+        .loading-text {
+            margin-top: 10px;
+            color: #667eea;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -502,13 +598,19 @@
         
         <!-- Auth Section -->
         <div id="authContainer" class="auth-container">
+            <div id="authFeedback" class="auth-feedback"></div>
             <div id="loginForm" class="login-form">
                 <h3>Sign in to vote on papers</h3>
-                <input type="email" id="email" placeholder="Email" required>
-                <input type="password" id="password" placeholder="Password" required>
-                <button onclick="handleSignIn()" class="auth-btn">Sign In</button>
+                <input type="email" id="email" placeholder="Email" required onkeypress="if(event.key==='Enter') handleSignIn()">
+                <input type="password" id="password" placeholder="Password" required onkeypress="if(event.key==='Enter') handleSignIn()">
+                <button onclick="handleSignIn()" class="auth-btn" id="signInBtn">Sign In</button>
+                <div class="spinner" id="authSpinner"></div>
             </div>
             <div id="userInfo" class="user-info" style="display: none;"></div>
+            <div class="loading-overlay" id="authLoadingOverlay">
+                <div class="spinner show"></div>
+                <div class="loading-text">Authenticating...</div>
+            </div>
         </div>
         
         <div class="stats" id="stats">Loading papers...</div>
@@ -740,25 +842,71 @@
             }
         });
         
+        // UI Helper Functions
+        function showAuthFeedback(message, type = 'info') {
+            const feedback = document.getElementById('authFeedback');
+            feedback.textContent = message;
+            feedback.className = `auth-feedback show ${type}`;
+            
+            // Auto-hide after 5 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 5000);
+            }
+        }
+        
+        function hideAuthFeedback() {
+            const feedback = document.getElementById('authFeedback');
+            feedback.classList.remove('show');
+        }
+        
+        function showAuthLoading(show = true) {
+            const overlay = document.getElementById('authLoadingOverlay');
+            const signInBtn = document.getElementById('signInBtn');
+            
+            if (show) {
+                overlay.classList.add('show');
+                signInBtn.disabled = true;
+            } else {
+                overlay.classList.remove('show');
+                signInBtn.disabled = false;
+            }
+        }
+        
         // Authentication functions
         async function handleSignIn() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
             if (!email || !password) {
-                alert('Please enter both email and password');
+                showAuthFeedback('Please enter both email and password', 'error');
                 return;
             }
             
+            // Show loading state
+            showAuthLoading(true);
+            hideAuthFeedback();
+            
             try {
+                showAuthFeedback('Signing in...', 'info');
                 await votingSystem.signIn(email, password);
+                
                 // Clear form
                 document.getElementById('email').value = '';
                 document.getElementById('password').value = '';
+                
+                showAuthFeedback('Successfully signed in! Loading your votes...', 'success');
+                
                 // Reload vote counts for all papers
                 await loadAllVoteCounts();
+                
+                showAuthFeedback('Welcome! You can now vote on papers.', 'success');
             } catch (error) {
                 console.error('Sign in error:', error);
+                showAuthFeedback(`Sign in failed: ${error.message || 'Invalid email or password'}`, 'error');
+            } finally {
+                showAuthLoading(false);
             }
         }
         
@@ -824,6 +972,7 @@
         async function quickLogin(email, password) {
             document.getElementById('email').value = email;
             document.getElementById('password').value = password;
+            showAuthFeedback(`Using test account: ${email.split('@')[0]}`, 'info');
             await handleSignIn();
         }
     </script>

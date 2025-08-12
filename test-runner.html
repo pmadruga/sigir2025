@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGIR 2025 Papers - Test Runner</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+        }
+        
+        .test-controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .btn {
+            background: #333;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .btn:hover {
+            background: #00ff00;
+            color: #1a1a1a;
+        }
+        
+        .console-output {
+            background: #000;
+            border: 1px solid #333;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-size: 0.9em;
+            height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status.loading {
+            background: rgba(255, 255, 0, 0.1);
+            color: #ffff00;
+            border: 1px solid #ffff00;
+        }
+        
+        .status.success {
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+        
+        .status.error {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff0000;
+            border: 1px solid #ff0000;
+        }
+        
+        .info-panel {
+            background: #222;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .info-panel h3 {
+            color: #00ffff;
+            margin-bottom: 10px;
+        }
+        
+        .dependency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .dependency {
+            padding: 8px;
+            background: #333;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        .dependency.loaded {
+            border-left: 3px solid #00ff00;
+        }
+        
+        .dependency.missing {
+            border-left: 3px solid #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 SIGIR 2025 Papers - Test Runner</h1>
+            <p>Comprehensive testing suite to ensure application integrity</p>
+        </div>
+        
+        <div class="info-panel">
+            <h3>🔍 Current Status</h3>
+            <div id="statusPanel" class="status loading">
+                Loading application dependencies...
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h3>📦 Dependencies</h3>
+            <div id="dependencyStatus" class="dependency-grid">
+                <div class="dependency missing">SupabaseVoting: <span id="supabaseVoting">❌</span></div>
+                <div class="dependency missing">Supabase Client: <span id="supabaseClient">❌</span></div>
+                <div class="dependency missing">Marked: <span id="marked">❌</span></div>
+                <div class="dependency missing">ConfigManager: <span id="configManager">❌</span></div>
+                <div class="dependency missing">AuthManager: <span id="authManager">❌</span></div>
+                <div class="dependency missing">PapersManager: <span id="papersManager">❌</span></div>
+                <div class="dependency missing">AppManager: <span id="appManager">❌</span></div>
+            </div>
+        </div>
+        
+        <div class="test-controls">
+            <button class="btn" onclick="runAllTests()">🧪 Run All Tests</button>
+            <button class="btn" onclick="runDiagnostics()">🔍 Run Diagnostics</button>
+            <button class="btn" onclick="clearConsole()">🧹 Clear Console</button>
+            <button class="btn" onclick="checkDependencies()">📦 Check Dependencies</button>
+        </div>
+        
+        <div class="info-panel">
+            <h3>📊 Console Output</h3>
+            <div id="consoleOutput" class="console-output"></div>
+        </div>
+        
+        <div class="info-panel">
+            <h3>📋 Manual Tests</h3>
+            <p>After running automated tests, manually verify:</p>
+            <ul>
+                <li>✅ Papers load and display correctly</li>
+                <li>✅ Search functionality works</li>
+                <li>✅ Authentication form appears</li>
+                <li>✅ Modal opens when clicking papers</li>
+                <li>✅ No console errors</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- All the same scripts as main app -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="load-env.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/papers.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/tests.js"></script>
+    
+    <script>
+        // Override console methods to capture output
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        const originalInfo = console.info;
+        
+        const consoleOutput = document.getElementById('consoleOutput');
+        
+        function appendToConsole(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = {
+                'log': '💬',
+                'error': '❌',
+                'warn': '⚠️',
+                'info': 'ℹ️'
+            }[type];
+            
+            consoleOutput.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            appendToConsole(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            appendToConsole(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            appendToConsole(args.join(' '), 'warn');
+        };
+        
+        console.info = function(...args) {
+            originalInfo.apply(console, args);
+            appendToConsole(args.join(' '), 'info');
+        };
+        
+        // Test functions
+        async function runAllTests() {
+            if (!window.TestSuite) {
+                updateStatus('TestSuite not loaded yet. Please wait...', 'error');
+                return;
+            }
+            
+            updateStatus('Running all tests...', 'loading');
+            const testSuite = new TestSuite();
+            const success = await testSuite.runAll();
+            
+            if (success) {
+                updateStatus('All tests passed! ✅', 'success');
+            } else {
+                updateStatus('Some tests failed. Check console for details.', 'error');
+            }
+        }
+        
+        function runDiagnostics() {
+            if (!window.TestSuite) {
+                updateStatus('TestSuite not loaded yet. Please wait...', 'error');
+                return;
+            }
+            
+            TestSuite.runDiagnostics();
+            updateStatus('Diagnostics complete. Check console for details.', 'success');
+        }
+        
+        function clearConsole() {
+            consoleOutput.textContent = '';
+            updateStatus('Console cleared', 'success');
+        }
+        
+        function checkDependencies() {
+            updateDependencyStatus();
+            updateStatus('Dependency status updated', 'success');
+        }
+        
+        function updateStatus(message, type) {
+            const statusPanel = document.getElementById('statusPanel');
+            statusPanel.textContent = message;
+            statusPanel.className = `status ${type}`;
+        }
+        
+        function updateDependencyStatus() {
+            const dependencies = {
+                'supabaseVoting': () => !!window.SupabaseVoting,
+                'supabaseClient': () => !!window.supabase,
+                'marked': () => !!window.marked,
+                'configManager': () => !!window.ConfigManager,
+                'authManager': () => !!window.AuthManager,
+                'papersManager': () => !!window.PapersManager,
+                'appManager': () => !!window.AppManager
+            };
+            
+            Object.entries(dependencies).forEach(([id, checkFn]) => {
+                const element = document.getElementById(id);
+                const parentDiv = element.closest('.dependency');
+                
+                if (checkFn()) {
+                    element.textContent = '✅';
+                    parentDiv.classList.remove('missing');
+                    parentDiv.classList.add('loaded');
+                } else {
+                    element.textContent = '❌';
+                    parentDiv.classList.remove('loaded');
+                    parentDiv.classList.add('missing');
+                }
+            });
+        }
+        
+        // Update status on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                updateDependencyStatus();
+                
+                // Check if all critical dependencies are loaded
+                const critical = [
+                    window.SupabaseVoting,
+                    window.supabase,
+                    window.marked,
+                    window.ConfigManager,
+                    window.AuthManager,
+                    window.PapersManager,
+                    window.AppManager
+                ].every(dep => !!dep);
+                
+                if (critical) {
+                    updateStatus('All dependencies loaded successfully! ✅', 'success');
+                } else {
+                    updateStatus('Some dependencies are missing. Check status above.', 'error');
+                }
+            }, 1000);
+        });
+        
+        // Auto-refresh dependency status every 2 seconds
+        setInterval(updateDependencyStatus, 2000);
+    </script>
+</body>
+</html>

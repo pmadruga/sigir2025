@@ -22,8 +22,14 @@ class AppManager {
             // Load configuration
             await this.loadConfiguration();
             
+            // Wait for dependencies to load
+            await this.waitForDependencies();
+            
             // Initialize voting system
-            this.initializeVotingSystem();
+            const votingInitialized = this.initializeVotingSystem();
+            if (!votingInitialized) {
+                throw new Error('Failed to initialize voting system');
+            }
             
             // Initialize managers
             this.initializeManagers();
@@ -41,6 +47,32 @@ class AppManager {
             console.error('❌ Failed to initialize application:', error);
             this.showInitializationError(error);
         }
+    }
+
+    /**
+     * Wait for required dependencies to load
+     */
+    async waitForDependencies() {
+        const maxAttempts = 50; // 5 seconds max
+        let attempts = 0;
+
+        while (attempts < maxAttempts) {
+            if (window.SupabaseVoting && window.supabase && window.marked) {
+                console.log('✅ All dependencies loaded');
+                return;
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+        }
+
+        // Check which dependencies are missing
+        const missing = [];
+        if (!window.SupabaseVoting) missing.push('SupabaseVoting');
+        if (!window.supabase) missing.push('Supabase client');
+        if (!window.marked) missing.push('Marked (markdown parser)');
+
+        throw new Error(`Required dependencies not loaded: ${missing.join(', ')}`);
     }
 
     /**
@@ -64,7 +96,8 @@ class AppManager {
             const config = this.configManager.getAll();
             
             if (!window.SupabaseVoting) {
-                throw new Error('SupabaseVoting class not found');
+                console.warn('⚠️ SupabaseVoting class not found, waiting for scripts to load...');
+                return false;
             }
             
             this.votingSystem = new SupabaseVoting(
@@ -73,6 +106,7 @@ class AppManager {
             );
             
             console.log('✅ Voting system initialized');
+            return true;
         } catch (error) {
             console.error('❌ Failed to initialize voting system:', error);
             throw error;
@@ -255,15 +289,28 @@ window.AppManager = null;
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        window.AppManager = new AppManager();
+        // Wait for all scripts to load completely
+        await new Promise(resolve => {
+            if (document.readyState === 'complete') {
+                resolve();
+            } else {
+                window.addEventListener('load', resolve);
+            }
+        });
         
-        // Wait a moment for all scripts to load
-        setTimeout(async () => {
-            await window.AppManager.initialize();
-        }, 100);
+        // Additional safety delay for script loading
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        console.log('📦 Initializing AppManager...');
+        window.AppManager = new AppManager();
+        await window.AppManager.initialize();
         
     } catch (error) {
         console.error('Failed to create app manager:', error);
+        // Let the AppManager handle the error display
+        if (window.AppManager) {
+            window.AppManager.showInitializationError(error);
+        }
     }
 });
 

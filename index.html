@@ -4,976 +4,150 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGIR 2025 Papers - README Collection</title>
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 40px;
-            padding: 20px;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.95;
-        }
-        
-        .search-box {
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .search-input {
-            width: 100%;
-            max-width: 600px;
-            padding: 15px 20px;
-            font-size: 1rem;
-            font-family: 'Atkinson Hyperlegible', sans-serif;
-            border: 2px solid white;
-            border-radius: 30px;
-            background: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: box-shadow 0.3s;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .stats {
-            text-align: center;
-            color: white;
-            margin-bottom: 20px;
-            font-size: 1.1rem;
-        }
-        
-        .papers-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        
-        .paper-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .paper-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-        }
-        
-        .paper-card.active {
-            border: 2px solid #667eea;
-            background: #f8f9ff;
-        }
-        
-        .paper-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-        
-        .paper-path {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 15px;
-            padding: 5px 10px;
-            background: #f5f5f5;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            word-break: break-all;
-        }
-        
-        .paper-preview {
-            font-size: 0.9rem;
-            color: #555;
-            line-height: 1.5;
-            max-height: 100px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .paper-preview::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 30px;
-            background: linear-gradient(transparent, white);
-        }
-        
-        /* Modal Styles */
-        .modal-backdrop {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            animation: fadeIn 0.3s;
-        }
-        
-        .modal-backdrop.show {
-            display: block;
-        }
-        
-        .modal-content {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 1200px;
-            height: 90vh;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 25px 70px rgba(0,0,0,0.4);
-            z-index: 1001;
-            overflow: hidden;
-            animation: slideIn 0.3s;
-        }
-        
-        .modal-content.show {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 25px 30px;
-            border-bottom: 2px solid #eee;
-            background: #fafafa;
-        }
-        
-        .modal-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #2d3748;
-            margin: 0;
-            max-width: 80%;
-        }
-        
-        .modal-close {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-family: 'Atkinson Hyperlegible', sans-serif;
-            font-weight: 700;
-            transition: background 0.3s;
-        }
-        
-        .modal-close:hover {
-            background: #5a67d8;
-        }
-        
-        .modal-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 30px;
-            font-size: 1.05rem;
-            line-height: 1.8;
-        }
-        
-        .modal-body h1 { 
-            font-size: 2rem; 
-            margin: 30px 0 20px 0;
-            color: #2d3748;
-            font-weight: 700;
-        }
-        
-        .modal-body h2 { 
-            font-size: 1.6rem; 
-            margin: 25px 0 15px 0;
-            color: #2d3748;
-            font-weight: 700;
-        }
-        
-        .modal-body h3 { 
-            font-size: 1.3rem; 
-            margin: 20px 0 10px 0;
-            color: #2d3748;
-            font-weight: 700;
-        }
-        
-        .modal-body p {
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        .modal-body ul, .modal-body ol {
-            margin: 15px 0 15px 30px;
-        }
-        
-        .modal-body li {
-            margin-bottom: 10px;
-        }
-        
-        .modal-body code {
-            background: #f5f5f5;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.95em;
-        }
-        
-        .modal-body pre {
-            background: #f8f8f8;
-            padding: 20px;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin: 20px 0;
-            border-left: 4px solid #667eea;
-        }
-        
-        .modal-body blockquote {
-            border-left: 4px solid #667eea;
-            padding-left: 20px;
-            margin: 20px 0;
-            color: #555;
-            font-style: italic;
-        }
-        
-        .modal-body a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .modal-body a:hover {
-            text-decoration: underline;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -45%);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .papers-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .modal-content {
-                width: 95%;
-                height: 95vh;
-            }
-            
-            .modal-body {
-                padding: 20px;
-            }
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: white;
-            font-size: 1.2rem;
-        }
-        
-        /* Auth Styles */
-        .auth-container {
-            max-width: 400px;
-            margin: 0 auto 30px;
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            position: relative;
-        }
-        
-        .login-form h3 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        
-        .login-form input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-family: 'Atkinson Hyperlegible', sans-serif;
-            font-size: 1rem;
-        }
-        
-        .auth-btn {
-            width: 100%;
-            padding: 12px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Atkinson Hyperlegible', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .auth-btn:hover {
-            background: #5a67d8;
-        }
-        
-        .auth-btn.logout {
-            width: auto;
-            padding: 8px 16px;
-            margin-left: 10px;
-            font-size: 0.9rem;
-        }
-        
-        .user-info {
-            text-align: center;
-            color: #333;
-        }
-        
-        /* Voting Styles */
-        .voting-buttons {
-            display: none;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 15px;
-            padding: 10px;
-            background: #f8f9ff;
-            border-radius: 8px;
-        }
-        
-        .vote-btn {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-        }
-        
-        .vote-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .upvote-btn {
-            color: #10B981;
-            border-color: #10B981;
-        }
-        
-        .upvote-btn.active {
-            background: #10B981;
-            color: white;
-        }
-        
-        .downvote-btn {
-            color: #EF4444;
-            border-color: #EF4444;
-        }
-        
-        .downvote-btn.active {
-            background: #EF4444;
-            color: white;
-        }
-        
-        .vote-count {
-            font-weight: 600;
-            min-width: 20px;
-            text-align: center;
-        }
-        
-        /* Test Users Section */
-        .test-users-section {
-            margin-top: 15px;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
-        
-        .test-users-section details {
-            cursor: pointer;
-        }
-        
-        .test-users-section summary {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 10px;
-            padding: 5px;
-            background: #f8f9ff;
-            border-radius: 6px;
-            text-align: center;
-        }
-        
-        .test-users-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 10px;
-        }
-        
-        .test-user-btn {
-            padding: 8px 12px;
-            background: #f0f4f8;
-            border: 1px solid #d0d7de;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'Atkinson Hyperlegible', sans-serif;
-        }
-        
-        .test-user-btn:hover {
-            background: #e6f3ff;
-            border-color: #667eea;
-        }
-        
-        /* Loading Spinner */
-        .spinner {
-            display: none;
-            width: 40px;
-            height: 40px;
-            margin: 20px auto;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        .spinner.show {
-            display: block;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Feedback Messages */
-        .auth-feedback {
-            display: none;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            animation: slideDown 0.3s ease-out;
-        }
-        
-        .auth-feedback.show {
-            display: block;
-        }
-        
-        .auth-feedback.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .auth-feedback.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .auth-feedback.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .auth-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .loading-overlay {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            z-index: 10;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-        
-        .loading-overlay.show {
-            display: flex;
-        }
-        
-        .loading-text {
-            margin-top: 10px;
-            color: #667eea;
-            font-weight: 600;
-        }
-    </style>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/styles.css">
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="Browse and explore research papers from SIGIR 2025 with interactive README documentation">
+    <meta name="author" content="SIGIR 2025 Papers Collection">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="SIGIR 2025 Papers - README Collection">
+    <meta property="og:description" content="Interactive collection of SIGIR 2025 research papers with voting and search functionality">
+    <meta property="og:type" content="website">
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#667eea">
 </head>
+
 <body>
     <div class="container">
+        <!-- Header Section -->
         <header>
             <h1>SIGIR 2025 Papers</h1>
             <p class="subtitle">README Documentation Collection</p>
         </header>
         
+        <!-- Search Section -->
         <div class="search-box">
-            <input type="text" class="search-input" placeholder="Search papers by title or content..." id="searchInput">
+            <input 
+                type="text" 
+                class="search-input" 
+                placeholder="Search papers by title or content..." 
+                id="searchInput"
+                aria-label="Search papers"
+            >
         </div>
         
-        <!-- Auth Section -->
+        <!-- Authentication Section -->
         <div id="authContainer" class="auth-container">
-            <div id="authFeedback" class="auth-feedback"></div>
+            <div id="authFeedback" class="auth-feedback" role="alert"></div>
+            
             <div id="loginForm" class="login-form">
                 <h3>Sign in to vote on papers</h3>
-                <input type="email" id="email" placeholder="Email" required onkeypress="if(event.key==='Enter') handleSignIn()">
-                <input type="password" id="password" placeholder="Password" required onkeypress="if(event.key==='Enter') handleSignIn()">
-                <button onclick="handleSignIn()" class="auth-btn" id="signInBtn">Sign In</button>
-                <div class="spinner" id="authSpinner"></div>
+                <form id="authForm" novalidate>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        placeholder="Email" 
+                        required 
+                        autocomplete="email"
+                        aria-label="Email address"
+                    >
+                    <input 
+                        type="password" 
+                        id="password" 
+                        placeholder="Password" 
+                        required 
+                        autocomplete="current-password"
+                        aria-label="Password"
+                    >
+                    <button type="submit" class="auth-btn" id="signInBtn">
+                        Sign In
+                    </button>
+                </form>
             </div>
-            <div id="userInfo" class="user-info" style="display: none;"></div>
-            <div class="loading-overlay" id="authLoadingOverlay">
+            
+            <div id="userInfo" class="user-info" style="display: none;" role="status"></div>
+            
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="authLoadingOverlay" aria-hidden="true">
                 <div class="spinner show"></div>
                 <div class="loading-text">Authenticating...</div>
             </div>
         </div>
         
-        <div class="stats" id="stats">Loading papers...</div>
+        <!-- Statistics -->
+        <div class="stats" id="stats" role="status">Loading papers...</div>
         
-        <div class="papers-grid" id="papersGrid">
-            <div class="loading">Loading papers...</div>
-        </div>
+        <!-- Papers Grid -->
+        <main>
+            <div class="papers-grid" id="papersGrid" role="main" aria-live="polite">
+                <div class="loading">Loading papers...</div>
+            </div>
+        </main>
     </div>
     
     <!-- Modal -->
-    <div class="modal-backdrop" id="modalBackdrop"></div>
-    <div class="modal-content" id="modalContent">
+    <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
+    <div 
+        class="modal-content" 
+        id="modalContent" 
+        role="dialog" 
+        aria-labelledby="modalTitle" 
+        aria-hidden="true"
+    >
         <div class="modal-header">
             <h2 class="modal-title" id="modalTitle">Paper Title</h2>
-            <button class="modal-close" id="modalClose">Close (ESC)</button>
+            <button 
+                class="modal-close" 
+                id="modalClose" 
+                aria-label="Close modal (Press Escape)"
+            >
+                Close (ESC)
+            </button>
         </div>
         <div class="modal-body" id="modalBody">
             <!-- README content will be inserted here -->
         </div>
     </div>
     
+    <!-- External Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Legacy compatibility scripts (for production) -->
     <script src="load-env.js"></script>
     <script src="supabase-client.js"></script>
+    
+    <!-- Modular Application Scripts -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/papers.js"></script>
+    <script src="assets/js/app.js"></script>
+    
+    <!-- Service Worker Registration (optional) -->
     <script>
-        // Paper data
-        const papers = [
-            { title: "Large Scale Deployment of BERT Based Cross Encoder Model for Re-Ranking in Walmart Search Engine", path: "Large Scale Deployment of BERT Based Cross Encoder Model for Re-Ranking in Walmart Search Engine" },
-            { title: "Structure-Aware Conversational Legal Case Retrieval", path: "Structure-Aware Conversational Legal Case Retrieval" },
-            { title: "Light: Enhancing Learning Path Recommendation via Knowledge Topology-Aware Sequence Optimization", path: "Light: Enhancing Learning Path Recommendation via Knowledge Topology-Aware Sequence Optimization" },
-            { title: "A Reproducibility Study of Graph Based Legal Case Retrieval", path: "A Reproducibility Study of Graph Based Legal Case Retrieval" },
-            { title: "Efficient Recommendation with Millions of Items by Dynamic Pruning", path: "Efficient Recommendation with Millions of Items by Dynamic Pruning" },
-            { title: "Cafe+: Towards Compact, Adaptive, and Fast Embedding", path: "Cafe+: Towards Compact, Adaptive, and Fast Embedding" },
-            { title: "Pre-training for Recommendation Unlearning", path: "Pre-training for Recommendation Unlearning" },
-            { title: "Data-efficient Meta-models for Evaluation of Context-based Questions and Answers in LLMs", path: "Data-efficient Meta-models for Evaluation of Context-based Questions and Answers in LLMs" },
-            { title: "Insight Agents: An LLM-Based Multi-Agent System for Data Insights", path: "Insight Agents: An LLM-Based Multi-Agent System for Data Insights" },
-            { title: "From Relevance to Reality: Scaling Human-Centered Evaluation in the LLM Era", path: "From Relevance to Reality: Scaling Human-Centered Evaluation in the LLM Era" },
-            { title: "AuditLLM: A Tool for Auditing Large Language Models Using Multiprobe Approach", path: "AuditLLM: A Tool for Auditing Large Language Models Using Multiprobe Approach" },
-            { title: "Using Large Language Models to Generate, Validate, and Apply User Intent Taxonomies", path: "Using Large Language Models to Generate, Validate, and Apply User Intent Taxonomies" },
-            { title: "From Prompt Engineering to Prompt Science", path: "aa_in_review/From Prompt Engineering to Prompt Science" },
-            { title: "Face Fine-grained Reference Free Evaluator", path: "Face Fine-grained Reference Free Evaluator" },
-            { title: "ReARTeR Retrieval Augmented Reasoning with Trustworthy Process Rewarding", path: "ReARTeR Retrieval Augmented Reasoning with Trustworthy Process Rewarding" },
-            { title: "Unveiling Knowledge Utilization Mechanisms in LLM based RAG", path: "Unveiling Knowledge Utilization Mechanisms in LLM based RAG" },
-            { title: "Robust Fine Tuning for RAG Against Retrieval Defects", path: "Robust Fine Tuning for RAG Against Retrieval Defects" },
-            { title: "Predicting RAG Performance for Text Completion", path: "Predicting RAG Performance for Text Completion" },
-            { title: "RAG with Collaborative Filtering for Personalized Text Generation", path: "RAG with Collaborative Filtering for Personalized Text Generation" },
-            { title: "Knowing You Don't Know: Learning When to Continue Search Multi Round RAG", path: "Knowing You Dont Know Learning When to Continue Search Multi Round RAG" },
-            { title: "Cirag Retrieval Augmented Language Model with Collective Intelligence", path: "Cirag Retrieval Augmented Language Model with Collective Intelligence" },
-            { title: "Response Quality Assessment RAG Conditional Conformal Factuality", path: "Response Quality Assessment RAG Conditional Conformal Factuality" },
-            { title: "Language Model Alignment Conversational Shopping Amazon", path: "Language Model Alignment Conversational Shopping Amazon" },
-            { title: "Inquiry Assistant Using LLM-Generated Knowledge Graphs", path: "Inquiry Assistant Using LLM-Generated Knowledge Graphs" },
-            { title: "MAAQR: An LLM-Based Multi-Agent Framework for Adaptive Query Rewriting in Alipay Search", path: "Maaqr an LLM-Based Multi-Agent Framework for Adaptive Query Rewriting in Alipay Search" },
-            { title: "Examples as the Prompt: A Scalable Approach for Efficient LLM Adaptation in E-Commerce", path: "Examples as the Prompt A Scalable Approach for Efficient LLM Adaptation in E-Commerce" },
-            { title: "HELM-D: A Dynamic Benchmark for Continual LLM Evaluation", path: "aa_in_review/Helm-D: A Dynamic Benchmark for Continual LLM Evaluation" },
-            { title: "A Framework for Calibrating Human Raters on Subjective LLM Tasks", path: "aa_in_review/A Framework for Calibrating Human Raters on Subjective LLM Tasks" },
-            { title: "Red-Teaming at Scale: Systematically Discovering LLM Failure Modes", path: "Red-Teaming at Scale: Systematically Discovering LLM Failure Modes" },
-            { title: "Evaluating Reasoning Pathways, Not Just Final Answers", path: "aa_in_review/Evaluating Reasoning Pathways, Not Just Final Answers" },
-            { title: "Assessing the Viability and Bias of LLM-based Evaluators", path: "aa_in_review/Assessing the Viability and Bias of LLM-based Evaluators" },
-            { title: "WildChat: A Benchmark of Unfiltered, Real-World User Interactions", path: "WildChat: A Benchmark of Unfiltered, Real-World User Interactions" },
-            { title: "Proactive Conversational AI: A Comprehensive Survey of Advancements and Opportunities", path: "Proactive Conversational AI A Comprehensive Survey of Advancements and Opportunities" },
-            { title: "DISCO LLM: Knowledge Distillation for Efficient Sparse Retrieval in Conversational Search", path: "Disco LLM Knowledge Distillation for Efficient Sparse Retrieval in Conversational Search" },
-            { title: "Clarifying Ambiguities on the Role of Ambiguity Types in Prompting Methods for Clarification Generation", path: "Clarifying Ambiguities on the Role of Ambiguity Types in Prompting Methods for Clarification Generation" },
-            { title: "Beyond Whole Dialogue Modeling: Contextual Disentanglement for Conversational Recommendation", path: "Beyond Whole Dialogue Modeling Contextual Disentanglement for Conversational Recommendation" },
-            { title: "MSCRS: Multi-Modal Semantic Graph Prompt Learning Framework for Conversational Recommender Systems", path: "Mscrs Multi-Modal Semantic Graph Prompt Learning Framework for Conversational Recommender Systems" },
-            { title: "Action First: Leveraging Preference-Aware Actions for More Effective Decision-Making in Interactive Recommender Systems", path: "Action First Leveraging Preference-Aware Actions for More Effective Decision-Making in Interactive Recommender Systems" },
-            { title: "Bridging the Gap from Ad-Hoc to Proactive Search in Conversations", path: "Bridging the Gap from Ad-Hoc to Proactive Search in Conversations" },
-            { title: "Search-Based Interaction for Conversation Recommendation via Generative Reward Model Based Simulated User", path: "Search-Based Interaction for Conversation Recommendation via Generative Reward Model Based Simulated User" },
-            { title: "Rankers, Judges, and Assistants: Towards Understanding the Interplay of LLMs in Information Retrieval Evaluation", path: "Rankers, Judges, and Assistants: Towards Understanding the Interplay of LLMs in Information Retrieval Evaluation" },
-            { title: "InstructRAG: Leveraging Retrieval-Augmented Generation on Instruction Graphs for LLM-Based Task Planning", path: "InstructRAG: Leveraging Retrieval-Augmented Generation on Instruction Graphs for LLM-Based Task Planning" },
-            { title: "A Unified Retrieval Framework with Document Ranking and EDU Filtering for Multi-Document Summarization", path: "A Unified Retrieval Framework with Document Ranking and EDU Filtering for Multi-Document Summarization" },
-            { title: "Retrieval Augmented Generation for Dynamic Graph Modeling", path: "Retrieval Augmented Generation for Dynamic Graph Modeling" },
-            { title: "Empowering Large Language Model Agent through Step-Level Self-Critique and Self-Training", path: "Empowering Large Language Model Agent through Step-Level Self-Critique and Self-Training" },
-            { title: "Thursday Morning Workshop Papers", path: "unprocessed/Thursday Morning Workshop" },
-            { title: "Thursday Afternoon Workshop Papers", path: "unprocessed/Thursday Afternoon Workshop" },
-            { title: "Alleviating LLM-Based Generative Retrieval Hallucination in Alipay Search", path: "Alleviating LLM-Based Generative Retrieval Hallucination in Alipay Search" }
-        ];
-        
-        let readmeCache = {};
-        let currentPaper = null;
-        let allCards = [];
-        
-        // Modal elements
-        const modalBackdrop = document.getElementById('modalBackdrop');
-        const modalContent = document.getElementById('modalContent');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalBody = document.getElementById('modalBody');
-        const modalClose = document.getElementById('modalClose');
-        
-        // Load README content
-        async function loadReadme(paper) {
-            if (readmeCache[paper.path]) {
-                return readmeCache[paper.path];
-            }
-            
-            try {
-                // Split path and encode each part separately to handle special characters
-                const pathParts = paper.path.split('/');
-                const encodedParts = pathParts.map(part => encodeURIComponent(part));
-                const encodedPath = encodedParts.join('/');
-                
-                console.log(`Fetching: ${encodedPath}/README.md`); // Debug log
-                const response = await fetch(`${encodedPath}/README.md`);
-                if (!response.ok) {
-                    console.log(`Failed to fetch ${encodedPath}/README.md - Status: ${response.status}`);
-                    throw new Error('README not found');
-                }
-                const content = await response.text();
-                readmeCache[paper.path] = content;
-                return content;
-            } catch (error) {
-                console.error(`Error loading README for ${paper.path}:`, error);
-                return `# ${paper.title}\n\nREADME file not found or could not be loaded.\n\nError: ${error.message}`;
-            }
-        }
-        
-        // Extract preview text
-        function extractPreview(markdown) {
-            const lines = markdown.split('\n');
-            for (let line of lines) {
-                if (line.trim() && !line.startsWith('#')) {
-                    const preview = line.trim();
-                    return preview.length > 150 ? preview.substring(0, 150) + '...' : preview;
-                }
-            }
-            return '';
-        }
-        
-        // Open modal
-        function openModal(paper) {
-            currentPaper = paper;
-            
-            // Load and display content
-            loadReadme(paper).then(content => {
-                modalTitle.textContent = paper.title;
-                modalBody.innerHTML = marked.parse(content);
-                
-                // Show modal
-                modalBackdrop.classList.add('show');
-                modalContent.classList.add('show');
-                document.body.style.overflow = 'hidden';
-                
-                // Update active card
-                allCards.forEach((card, index) => {
-                    card.classList.toggle('active', papers[index] === paper);
-                });
+        // Register service worker if available (for offline support in the future)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Uncomment when service worker is implemented
+                // navigator.serviceWorker.register('/sw.js');
             });
         }
         
-        // Close modal
-        function closeModal() {
-            modalBackdrop.classList.remove('show');
-            modalContent.classList.remove('show');
-            document.body.style.overflow = '';
-            
-            // Remove active state from cards
-            allCards.forEach(card => card.classList.remove('active'));
-            currentPaper = null;
-        }
-        
-        // Display all papers
-        async function displayPapers() {
-            const grid = document.getElementById('papersGrid');
-            grid.innerHTML = '';
-            allCards = [];
-            
-            for (const paper of papers) {
-                const card = document.createElement('div');
-                card.className = 'paper-card';
-                card.setAttribute('data-paper-path', paper.path);
-                
-                const readme = await loadReadme(paper);
-                const preview = extractPreview(readme);
-                
-                card.innerHTML = `
-                    <div class="paper-title">${paper.title}</div>
-                    <div class="paper-path">${paper.path}/</div>
-                    <div class="paper-preview">${preview || 'Click to view README content...'}</div>
-                    <div class="voting-buttons">
-                        <div class="vote-btn upvote-btn" onclick="event.stopPropagation(); handleVote('${paper.path}', 1)">
-                            👍 <span class="vote-count upvote-count">0</span>
-                        </div>
-                        <div class="vote-btn downvote-btn" onclick="event.stopPropagation(); handleVote('${paper.path}', -1)">
-                            👎 <span class="vote-count downvote-count">0</span>
-                        </div>
-                    </div>
-                `;
-                
-                // Add click handler
-                card.addEventListener('click', () => openModal(paper));
-                
-                grid.appendChild(card);
-                allCards.push(card);
-            }
-            
-            document.getElementById('stats').textContent = `${papers.length} papers available`;
-        }
-        
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', async (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            let visibleCount = 0;
-            
-            for (let i = 0; i < allCards.length; i++) {
-                const paper = papers[i];
-                const readme = await loadReadme(paper);
-                const matchesTitle = paper.title.toLowerCase().includes(searchTerm);
-                const matchesContent = readme.toLowerCase().includes(searchTerm);
-                
-                if (searchTerm === '' || matchesTitle || matchesContent) {
-                    allCards[i].style.display = 'block';
-                    visibleCount++;
-                } else {
-                    allCards[i].style.display = 'none';
-                }
-            }
-            
-            document.getElementById('stats').textContent = `Showing ${visibleCount} of ${papers.length} papers`;
-        });
-        
-        // Modal event listeners
-        modalClose.addEventListener('click', closeModal);
-        modalBackdrop.addEventListener('click', closeModal);
-        
-        // ESC key to close modal
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && currentPaper) {
-                closeModal();
-            }
-        });
-        
-        // UI Helper Functions
-        function showAuthFeedback(message, type = 'info') {
-            const feedback = document.getElementById('authFeedback');
-            feedback.textContent = message;
-            feedback.className = `auth-feedback show ${type}`;
-            
-            // Auto-hide after 5 seconds for success messages
-            if (type === 'success') {
-                setTimeout(() => {
-                    feedback.classList.remove('show');
-                }, 5000);
-            }
-        }
-        
-        function hideAuthFeedback() {
-            const feedback = document.getElementById('authFeedback');
-            feedback.classList.remove('show');
-        }
-        
-        function showAuthLoading(show = true) {
-            const overlay = document.getElementById('authLoadingOverlay');
-            const signInBtn = document.getElementById('signInBtn');
-            
-            if (show) {
-                overlay.classList.add('show');
-                signInBtn.disabled = true;
-            } else {
-                overlay.classList.remove('show');
-                signInBtn.disabled = false;
-            }
-        }
-        
-        // Authentication functions
-        async function handleSignIn() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            if (!email || !password) {
-                showAuthFeedback('Please enter both email and password', 'error');
-                return;
-            }
-            
-            // Show loading state
-            showAuthLoading(true);
-            hideAuthFeedback();
-            
-            try {
-                showAuthFeedback('Signing in...', 'info');
-                await votingSystem.signIn(email, password);
-                
-                // Clear form
-                document.getElementById('email').value = '';
-                document.getElementById('password').value = '';
-                
-                showAuthFeedback('Successfully signed in! Loading your votes...', 'success');
-                
-                // Reload vote counts for all papers
-                await loadAllVoteCounts();
-                
-                showAuthFeedback('Welcome! You can now vote on papers.', 'success');
-            } catch (error) {
-                console.error('Sign in error:', error);
-                showAuthFeedback(`Sign in failed: ${error.message || 'Invalid email or password'}`, 'error');
-            } finally {
-                showAuthLoading(false);
-            }
-        }
-        
-        // Vote handling functions
-        async function handleVote(paperPath, voteType) {
-            await votingSystem.vote(paperPath, voteType);
-        }
-        
-        async function loadAllVoteCounts() {
-            if (!votingSystem.currentUser) return;
-            
-            for (const paper of papers) {
-                await votingSystem.updateVoteCounts(paper.path);
-            }
-        }
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Get configuration from secure config
-            const config = window.SIGIR_CONFIG;
-            
-            if (!config) {
-                console.error('❌ Configuration not loaded. Please check config.js');
-                return;
-            }
-            
-            // Initialize voting system with secure credentials
-            votingSystem = new SupabaseVoting(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
-            
-            // Add quick login buttons for test users (development only)
-            if (config.TEST_USERS && config.TEST_USERS.length > 0) {
-                addTestUserButtons(config.TEST_USERS);
-            }
-            
-            // Wait a moment for auth to initialize
-            setTimeout(async () => {
-                await displayPapers();
-                await loadAllVoteCounts();
-            }, 1000);
-        });
-        
-        // Add quick login buttons for development (only if test users are available)
-        function addTestUserButtons(testUsers) {
-            const authContainer = document.getElementById('authContainer');
-            const testButtonsDiv = document.createElement('div');
-            testButtonsDiv.className = 'test-users-section';
-            testButtonsDiv.innerHTML = `
-                <details>
-                    <summary>🧪 Quick Login (Test Users)</summary>
-                    <div class="test-users-grid">
-                        ${testUsers.map((user, index) => `
-                            <button class="test-user-btn" onclick="quickLogin('${user.email}', '${user.password}')">
-                                ${user.email.split('@')[0]}
-                            </button>
-                        `).join('')}
-                    </div>
-                </details>
-            `;
-            authContainer.appendChild(testButtonsDiv);
-        }
-        
-        // Quick login function for test users
-        async function quickLogin(email, password) {
-            document.getElementById('email').value = email;
-            document.getElementById('password').value = password;
-            showAuthFeedback(`Using test account: ${email.split('@')[0]}`, 'info');
-            await handleSignIn();
+        // Performance monitoring
+        if ('performance' in window) {
+            window.addEventListener('load', () => {
+                const loadTime = performance.now();
+                console.log(`📊 Page loaded in ${Math.round(loadTime)}ms`);
+            });
         }
     </script>
 </body>

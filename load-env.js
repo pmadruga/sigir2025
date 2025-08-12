@@ -1,6 +1,9 @@
-// Environment variable loader for local development
-// This script loads .env file for local development only
+// Legacy environment variable loader for local development
+// This script is kept for backward compatibility with production deployment
+// The new modular system uses assets/js/config.js instead
 (function() {
+    console.log('📦 Legacy environment loader (load-env.js) active');
+    
     // Only run in development (local file:// or localhost)
     if (typeof window !== 'undefined' && 
         (window.location.protocol === 'file:' || 
@@ -33,25 +36,29 @@
                     }
                 }
                 
-                // Set configuration
+                // Set configuration for both legacy and new system compatibility
                 window.SIGIR_CONFIG = {
                     SUPABASE_URL: envVars.SUPABASE_URL,
                     SUPABASE_ANON_KEY: envVars.SUPABASE_ANON_KEY,
                     TEST_USERS: testUsers
                 };
                 
-                console.log('✅ Environment variables loaded from .env file');
+                console.log('✅ Legacy: Environment variables loaded from .env file');
             })
             .catch(error => {
-                console.warn('⚠️ Could not load .env file. Using fallback configuration.');
-                console.warn('For local development, make sure you have a .env file with your Supabase credentials.');
+                console.warn('⚠️ Legacy: Could not load .env file. Using fallback configuration.');
                 
                 // Fallback to default configuration
                 loadDefaultConfig();
             });
     } else {
         // In production, config should be injected by GitHub Actions
-        console.log('🚀 Running in production mode');
+        console.log('🚀 Legacy: Running in production mode');
+        
+        // If no config exists yet, create default
+        if (!window.SIGIR_CONFIG) {
+            loadDefaultConfig();
+        }
     }
     
     function loadDefaultConfig() {

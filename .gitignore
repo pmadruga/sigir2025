@@ -24,6 +24,18 @@ Thumbs.db
 # Log files
 *.log
 
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+build/
+
 # Temporary text files from PDF conversion
 *_content.txt
 paper_content.txt

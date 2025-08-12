@@ -331,6 +331,162 @@
             color: white;
             font-size: 1.2rem;
         }
+        
+        /* Auth Styles */
+        .auth-container {
+            max-width: 400px;
+            margin: 0 auto 30px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .login-form h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .login-form input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Atkinson Hyperlegible', sans-serif;
+            font-size: 1rem;
+        }
+        
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Atkinson Hyperlegible', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .auth-btn:hover {
+            background: #5a67d8;
+        }
+        
+        .auth-btn.logout {
+            width: auto;
+            padding: 8px 16px;
+            margin-left: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .user-info {
+            text-align: center;
+            color: #333;
+        }
+        
+        /* Voting Styles */
+        .voting-buttons {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9ff;
+            border-radius: 8px;
+        }
+        
+        .vote-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .vote-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .upvote-btn {
+            color: #10B981;
+            border-color: #10B981;
+        }
+        
+        .upvote-btn.active {
+            background: #10B981;
+            color: white;
+        }
+        
+        .downvote-btn {
+            color: #EF4444;
+            border-color: #EF4444;
+        }
+        
+        .downvote-btn.active {
+            background: #EF4444;
+            color: white;
+        }
+        
+        .vote-count {
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        /* Test Users Section */
+        .test-users-section {
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        
+        .test-users-section details {
+            cursor: pointer;
+        }
+        
+        .test-users-section summary {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            padding: 5px;
+            background: #f8f9ff;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .test-users-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .test-user-btn {
+            padding: 8px 12px;
+            background: #f0f4f8;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Atkinson Hyperlegible', sans-serif;
+        }
+        
+        .test-user-btn:hover {
+            background: #e6f3ff;
+            border-color: #667eea;
+        }
     </style>
 </head>
 <body>
@@ -342,6 +498,17 @@
         
         <div class="search-box">
             <input type="text" class="search-input" placeholder="Search papers by title or content..." id="searchInput">
+        </div>
+        
+        <!-- Auth Section -->
+        <div id="authContainer" class="auth-container">
+            <div id="loginForm" class="login-form">
+                <h3>Sign in to vote on papers</h3>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button onclick="handleSignIn()" class="auth-btn">Sign In</button>
+            </div>
+            <div id="userInfo" class="user-info" style="display: none;"></div>
         </div>
         
         <div class="stats" id="stats">Loading papers...</div>
@@ -364,6 +531,9 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="load-env.js"></script>
+    <script src="supabase-client.js"></script>
     <script>
         // Paper data
         const papers = [
@@ -508,6 +678,7 @@
             for (const paper of papers) {
                 const card = document.createElement('div');
                 card.className = 'paper-card';
+                card.setAttribute('data-paper-path', paper.path);
                 
                 const readme = await loadReadme(paper);
                 const preview = extractPreview(readme);
@@ -516,6 +687,14 @@
                     <div class="paper-title">${paper.title}</div>
                     <div class="paper-path">${paper.path}/</div>
                     <div class="paper-preview">${preview || 'Click to view README content...'}</div>
+                    <div class="voting-buttons">
+                        <div class="vote-btn upvote-btn" onclick="event.stopPropagation(); handleVote('${paper.path}', 1)">
+                            👍 <span class="vote-count upvote-count">0</span>
+                        </div>
+                        <div class="vote-btn downvote-btn" onclick="event.stopPropagation(); handleVote('${paper.path}', -1)">
+                            👎 <span class="vote-count downvote-count">0</span>
+                        </div>
+                    </div>
                 `;
                 
                 // Add click handler
@@ -561,8 +740,92 @@
             }
         });
         
+        // Authentication functions
+        async function handleSignIn() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+            
+            try {
+                await votingSystem.signIn(email, password);
+                // Clear form
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+                // Reload vote counts for all papers
+                await loadAllVoteCounts();
+            } catch (error) {
+                console.error('Sign in error:', error);
+            }
+        }
+        
+        // Vote handling functions
+        async function handleVote(paperPath, voteType) {
+            await votingSystem.vote(paperPath, voteType);
+        }
+        
+        async function loadAllVoteCounts() {
+            if (!votingSystem.currentUser) return;
+            
+            for (const paper of papers) {
+                await votingSystem.updateVoteCounts(paper.path);
+            }
+        }
+        
         // Initialize
-        displayPapers();
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Get configuration from secure config
+            const config = window.SIGIR_CONFIG;
+            
+            if (!config) {
+                console.error('❌ Configuration not loaded. Please check config.js');
+                return;
+            }
+            
+            // Initialize voting system with secure credentials
+            votingSystem = new SupabaseVoting(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+            
+            // Add quick login buttons for test users (development only)
+            if (config.TEST_USERS && config.TEST_USERS.length > 0) {
+                addTestUserButtons(config.TEST_USERS);
+            }
+            
+            // Wait a moment for auth to initialize
+            setTimeout(async () => {
+                await displayPapers();
+                await loadAllVoteCounts();
+            }, 1000);
+        });
+        
+        // Add quick login buttons for development (only if test users are available)
+        function addTestUserButtons(testUsers) {
+            const authContainer = document.getElementById('authContainer');
+            const testButtonsDiv = document.createElement('div');
+            testButtonsDiv.className = 'test-users-section';
+            testButtonsDiv.innerHTML = `
+                <details>
+                    <summary>🧪 Quick Login (Test Users)</summary>
+                    <div class="test-users-grid">
+                        ${testUsers.map((user, index) => `
+                            <button class="test-user-btn" onclick="quickLogin('${user.email}', '${user.password}')">
+                                ${user.email.split('@')[0]}
+                            </button>
+                        `).join('')}
+                    </div>
+                </details>
+            `;
+            authContainer.appendChild(testButtonsDiv);
+        }
+        
+        // Quick login function for test users
+        async function quickLogin(email, password) {
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = password;
+            await handleSignIn();
+        }
     </script>
 </body>
 </html>

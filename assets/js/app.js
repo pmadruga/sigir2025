@@ -53,26 +53,46 @@ class AppManager {
      * Wait for required dependencies to load
      */
     async waitForDependencies() {
-        const maxAttempts = 50; // 5 seconds max
+        console.log('🔍 Checking for dependencies...');
+        
+        const dependencies = [
+            { name: 'Supabase client', check: () => window.supabase?.createClient },
+            { name: 'Marked parser', check: () => window.marked?.parse },
+            { name: 'SupabaseVoting class', check: () => window.SupabaseVoting },
+            { name: 'ConfigManager class', check: () => window.ConfigManager },
+            { name: 'AuthManager class', check: () => window.AuthManager },
+            { name: 'PapersManager class', check: () => window.PapersManager }
+        ];
+
+        const maxAttempts = 100; // 10 seconds max (more time for slower connections)
         let attempts = 0;
 
         while (attempts < maxAttempts) {
-            if (window.SupabaseVoting && window.supabase && window.marked) {
-                console.log('✅ All dependencies loaded');
+            const missing = dependencies.filter(dep => !dep.check());
+            
+            if (missing.length === 0) {
+                console.log('✅ All dependencies loaded successfully');
                 return;
+            }
+
+            if (attempts % 10 === 0) { // Log every second
+                console.log(`⏳ Waiting for: ${missing.map(d => d.name).join(', ')}`);
             }
 
             await new Promise(resolve => setTimeout(resolve, 100));
             attempts++;
         }
 
-        // Check which dependencies are missing
-        const missing = [];
-        if (!window.SupabaseVoting) missing.push('SupabaseVoting');
-        if (!window.supabase) missing.push('Supabase client');
-        if (!window.marked) missing.push('Marked (markdown parser)');
+        // Final check and detailed error
+        const missing = dependencies.filter(dep => !dep.check());
+        
+        console.error('❌ Dependency loading timeout. Missing:', missing.map(d => d.name));
+        console.error('🔍 Current state:');
+        dependencies.forEach(dep => {
+            console.error(`  - ${dep.name}: ${dep.check() ? '✅' : '❌'}`);
+        });
 
-        throw new Error(`Required dependencies not loaded: ${missing.join(', ')}`);
+        throw new Error(`Required dependencies not loaded after 10s: ${missing.map(d => d.name).join(', ')}`);
     }
 
     /**

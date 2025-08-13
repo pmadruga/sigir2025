@@ -112,11 +112,15 @@ class PapersManager {
                 <div class="paper-path">${this.escapeHtml(paper.path)}/</div>
                 <div class="paper-preview">${this.escapeHtml(preview) || 'Click to view README content...'}</div>
                 <div class="voting-buttons">
-                    <div class="vote-btn upvote-btn" data-paper-path="${this.escapeHtml(paper.path)}" data-vote-type="1">
+                    <div class="vote-btn upvote-btn" data-paper-path="${this.escapeHtml(paper.path)}" data-vote-type="1" title="I like this paper">
                         👍 <span class="vote-count upvote-count">0</span>
                     </div>
-                    <div class="vote-btn downvote-btn" data-paper-path="${this.escapeHtml(paper.path)}" data-vote-type="-1">
+                    <div class="vote-btn downvote-btn" data-paper-path="${this.escapeHtml(paper.path)}" data-vote-type="-1" title="I don't like this paper">
                         👎 <span class="vote-count downvote-count">0</span>
+                    </div>
+                    <div class="vote-btn need-info-btn" data-paper-path="${this.escapeHtml(paper.path)}" data-vote-type="0" title="This paper needs better information">
+                        ❓ <span class="vote-count need-info-count">0</span>
+                        <span class="vote-label">Need Info</span>
                     </div>
                 </div>
             `;
@@ -136,7 +140,13 @@ class PapersManager {
                     const voteBtn = e.target.closest('.vote-btn');
                     const paperPath = voteBtn.getAttribute('data-paper-path');
                     const voteType = parseInt(voteBtn.getAttribute('data-vote-type'));
-                    this.handleVote(paperPath, voteType);
+                    
+                    // Special handling for "need better info" button
+                    if (voteType === 0) {
+                        this.handleNeedInfoVote(paperPath);
+                    } else {
+                        this.handleVote(paperPath, voteType);
+                    }
                 }
             });
 
@@ -311,6 +321,179 @@ class PapersManager {
         } else {
             console.warn('Voting system not available');
         }
+    }
+
+    /**
+     * Handle "need better info" vote with reason prompt
+     * @param {string} paperPath - Paper path
+     */
+    async handleNeedInfoVote(paperPath) {
+        if (!window.AppManager || !window.AppManager.votingSystem) {
+            console.warn('Voting system not available');
+            return;
+        }
+
+        try {
+            // Check if user already voted "need better info" - if so, just toggle it off
+            const existingVote = await window.AppManager.votingSystem.getUserVote(paperPath);
+            
+            if (existingVote && existingVote.vote_type === 0) {
+                // Remove the vote (toggle off)
+                await window.AppManager.votingSystem.vote(paperPath, 0);
+                return;
+            }
+
+            // Show reason dialog
+            const reason = await this.showReasonDialog(paperPath);
+            
+            // Vote with reason (reason can be null if user cancels)
+            await window.AppManager.votingSystem.vote(paperPath, 0, reason);
+            
+        } catch (error) {
+            console.error('Need info voting error:', error);
+        }
+    }
+
+    /**
+     * Show reason dialog for "need better info" votes
+     * @param {string} paperPath - Paper path
+     * @returns {Promise<string|null>} Reason or null if cancelled
+     */
+    async showReasonDialog(paperPath) {
+        return new Promise((resolve) => {
+            // Create modal dialog
+            const modal = document.createElement('div');
+            modal.className = 'reason-modal-backdrop';
+            modal.innerHTML = `
+                <div class="reason-modal">
+                    <h3>Why does this paper need better info?</h3>
+                    <p><strong>Paper:</strong> ${this.escapeHtml(this.truncateTitle(paperPath, 60))}</p>
+                    <textarea 
+                        id="reasonText" 
+                        placeholder="Optional: Explain what information is missing or unclear..."
+                        rows="4"
+                        maxlength="500"
+                    ></textarea>
+                    <div class="reason-modal-buttons">
+                        <button type="button" id="reasonCancel" class="btn-secondary">Cancel</button>
+                        <button type="button" id="reasonSubmit" class="btn-primary">Submit Vote</button>
+                    </div>
+                </div>
+            `;
+
+            // Add styles
+            modal.style.cssText = `
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                animation: fadeIn 0.2s ease-out;
+            `;
+
+            const innerModal = modal.querySelector('.reason-modal');
+            innerModal.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 12px;
+                max-width: 500px;
+                width: 90%;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                animation: slideIn 0.3s ease-out;
+            `;
+
+            const textarea = modal.querySelector('#reasonText');
+            textarea.style.cssText = `
+                width: 100%;
+                padding: 12px;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+                font-family: inherit;
+                font-size: 14px;
+                margin: 15px 0;
+                resize: vertical;
+                min-height: 80px;
+            `;
+
+            const buttonContainer = modal.querySelector('.reason-modal-buttons');
+            buttonContainer.style.cssText = `
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+                margin-top: 20px;
+            `;
+
+            const buttons = modal.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.style.cssText = `
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                `;
+                
+                if (btn.classList.contains('btn-primary')) {
+                    btn.style.backgroundColor = '#667eea';
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.backgroundColor = '#f5f5f5';
+                    btn.style.color = '#333';
+                }
+            });
+
+            // Add event listeners
+            modal.querySelector('#reasonCancel').onclick = () => {
+                modal.remove();
+                resolve(null);
+            };
+
+            modal.querySelector('#reasonSubmit').onclick = () => {
+                const reason = textarea.value.trim();
+                modal.remove();
+                resolve(reason || null);
+            };
+
+            // Close on backdrop click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                    resolve(null);
+                }
+            });
+
+            // Close on Escape key
+            const escapeHandler = (e) => {
+                if (e.key === 'Escape') {
+                    modal.remove();
+                    document.removeEventListener('keydown', escapeHandler);
+                    resolve(null);
+                }
+            };
+            document.addEventListener('keydown', escapeHandler);
+
+            // Focus textarea
+            setTimeout(() => textarea.focus(), 100);
+
+            document.body.appendChild(modal);
+        });
+    }
+
+    /**
+     * Truncate text for display
+     * @param {string} text - Text to truncate
+     * @param {number} maxLength - Maximum length
+     * @returns {string} Truncated text
+     */
+    truncateTitle(text, maxLength = 40) {
+        if (text.length <= maxLength) {
+            return text;
+        }
+        return text.substring(0, maxLength) + '...';
     }
 
     /**

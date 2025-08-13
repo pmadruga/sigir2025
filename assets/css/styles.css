@@ -367,11 +367,12 @@ h1 {
     display: none;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     margin-top: 15px;
-    padding: 10px;
+    padding: 12px;
     background: #f8f9ff;
     border-radius: 8px;
+    flex-wrap: wrap;
 }
 
 .vote-btn {
@@ -412,10 +413,41 @@ h1 {
     color: white;
 }
 
+.need-info-btn {
+    color: #F59E0B;
+    border-color: #F59E0B;
+    font-size: 0.85rem;
+    flex-direction: column;
+    min-width: 70px;
+    text-align: center;
+}
+
+.need-info-btn.active {
+    background: #F59E0B;
+    color: white;
+}
+
+.need-info-btn .vote-label {
+    font-size: 0.7rem;
+    margin-top: 2px;
+    line-height: 1;
+}
+
 .vote-count {
     font-weight: 600;
     min-width: 20px;
     text-align: center;
+}
+
+/* Vote change indicator */
+.vote-btn.changed {
+    animation: voteChanged 0.5s ease-out;
+}
+
+@keyframes voteChanged {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); background-color: #667eea; color: white; }
+    100% { transform: scale(1); }
 }
 
 /* Test Users Section */
